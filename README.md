@@ -10,6 +10,8 @@ Requirements:
 
 ## Build Commands
 
+- First setup `cmake -B build -G "MinGW Makefiles"`
+
 - build only `cmake --build build`
 
 - build and run `cmake --build build -t run`
