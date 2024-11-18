@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-project(Until_Extration LANGUAGES CXX)
+project(Until_Extraction LANGUAGES CXX)
 
 # Specify the build output directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -30,6 +30,14 @@ add_executable(main src/main.cpp)
 
 target_link_libraries(main PRIVATE sfml-graphics)
 target_compile_features(main PRIVATE cxx_std_17)
+
+add_custom_command(
+        TARGET main POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/assets
+        ${CMAKE_BINARY_DIR}/assets
+        COMMENT "Copying assets directory to build output"
+)
 
 # Copy DLLs for Windows
 if(WIN32)
