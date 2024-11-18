@@ -26,7 +26,24 @@ FetchContent_Declare(SFML
 FetchContent_MakeAvailable(SFML)
 
 # Add executable
-add_executable(main src/main.cpp)
+add_executable(main src/main.cpp
+        src/Sprites/Sprite.cpp
+        src/Sprites/Sprite.hpp
+        src/Sprites/Player.cpp
+        src/Sprites/Player.hpp
+        src/Sprites/Enemy.cpp
+        src/Sprites/Enemy.hpp
+        src/GameEngine/State.hpp
+        src/GameEngine/StateMachine.cpp
+        src/GameEngine/StateMachine.hpp
+        src/GameEngine/AssetManager.cpp
+        src/GameEngine/AssetManager.hpp
+        src/GameEngine/InputManager.cpp
+        src/GameEngine/InputManager.hpp
+        src/GameEngine/Game.cpp
+        src/GameEngine/Game.hpp
+        src/Screens/SplashScreenState.cpp
+        src/Screens/SplashScreenState.hpp)
 
 target_link_libraries(main PRIVATE sfml-graphics)
 target_compile_features(main PRIVATE cxx_std_17)
