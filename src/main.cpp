@@ -1,218 +1,281 @@
 #include <SFML/Graphics.hpp>
-#include <vector>
-#include <random>
 #include <iostream>
+#include <vector>
 
 class TileMap {
 private:
-    // Core resources and texture management
-    sf::Texture tilesetTexture;              // Stores the tileset image
-    std::vector<sf::Sprite> mapSprites;      // Container for all map tiles
-    
-    // Map configuration constants
-    const int TILE_SIZE = 32;                // Size of each tile in pixels
-    const int MAP_WIDTH = 40;                // Number of tiles horizontally
-    const int MAP_HEIGHT = 30;               // Number of tiles vertically
-    const int VOID_BORDER = 5;               // Size of empty border around map
-    
+    // Core resources
+    sf::Texture texture; 
+    sf::Texture space;     // Stores the single tile texture
+    sf::Texture toptxtr;
+    sf::Texture tltxtr;
+    sf::Texture trtxtr;
+    sf::Texture ltxtr;
+    sf::Texture rtxtr;
+    sf::Texture btmtxtr;
+    sf::Texture btmltxtr;
+    sf::Texture btmrtxtr;
+    std::vector<sf::Sprite> tiles; // Container for all map tiles
+    std::vector<sf::Sprite> stiles;
+    std::vector<sf::Sprite> toptiles;
+    std::vector<sf::Sprite> tltiles;
+    std::vector<sf::Sprite> trtiles;
+    std::vector<sf::Sprite> ltiles;
+    std::vector<sf::Sprite> rtiles;
+    std::vector<sf::Sprite> btmtiles;
+    std::vector<sf::Sprite> btmltiles;
+    std::vector<sf::Sprite> btmrtiles;
+
+    // Map configuration
+    const int TILE_SIZE = 32;  // Size of each tile in pixels
+    const int MAP_WIDTH = 40*2;  // Number of tiles horizontally
+    const int MAP_HEIGHT = 30*2; // Number of tiles vertically
+    int map_lowerbound_width  = 40;
+    int map_lowerbound_height = 30;
+    int Map_boundary_width = MAP_WIDTH * 4;
+    int Map_boundary_height = MAP_HEIGHT * 4;
+
     // Camera settings
-    sf::View camera;                         // SFML View for camera control
-    float cameraSpeed = 500.0f;              // Camera movement speed (pixels/second)
-    
-    // Structure to define tile properties
-    struct TileType {
-        int x, y;                            // Coordinates in tileset
-        sf::Color tint;                      // Color tint for the tile
-    };
-    
-    // Define available tile types with their properties
-    const std::vector<TileType> tiles = {
-        {0, 0, sf::Color(76, 187, 23, 255)},  // Green grass - Main terrain
-        {1, 0, sf::Color(187, 187, 23, 255)}, // Yellow path - Walkable paths
-        {2, 0, sf::Color(0, 0, 0, 0)}         // Void tile - Transparent border
-    };
+    sf::View camera;            // SFML View for camera control
+    float cameraSpeed = 500.0f; // Camera movement speed (pixels/second)
 
 public:
     // Constructor: Initialize camera with the given view size
-    TileMap(const sf::Vector2f& viewSize) : camera(viewSize / 2.f, viewSize) {
-        camera.setCenter(viewSize / 2.f);    // Center the camera on startup
-    }
+    TileMap(const sf::Vector2f &viewSize){
+    float centerX = ((MAP_WIDTH + map_lowerbound_width)/2 );
+    float centerY = ((MAP_HEIGHT + map_lowerbound_height)/2 );
+    camera.setCenter(centerX, centerY);
+}
 
     // Initialize the tilemap and load resources
     bool initialize() {
-        // Load the tileset texture from file
-        if (!tilesetTexture.loadFromFile("assets/GRASS+.png")) {
-            std::cout << "Failed to load tileset texture from 'assets'!" << std::endl;
+        // Load the single tile texture
+        if (!texture.loadFromFile("../assets/tile014.png")) {
+            std::cout << "Failed to load tile texture!" << std::endl;
             return false;
         }
-        
-        generateMap();                       // Create initial map layout
+        if (!space.loadFromFile("../assets/Space_Stars4.png")) {
+            std::cout << "Failed to load space tile texture!" << std::endl;
+            return false;
+        }
+        if (!toptxtr.loadFromFile("../assets/tile040.png")) {
+            std::cout << "Failed to load top tile texture!" << std::endl;
+            return false;
+        }
+        if (!tltxtr.loadFromFile("../assets/tile039.png")) {
+            std::cout << "Failed to load top left tile texture!" << std::endl;
+            return false;
+        }
+        if (!trtxtr.loadFromFile("../assets/tile041.png")) {
+            std::cout << "Failed to load top right tile texture!" << std::endl;
+            return false;
+        }
+        if (!ltxtr.loadFromFile("../assets/tile052.png")) {
+            std::cout << "Failed to load left tile texture!" << std::endl;
+            return false;
+        }
+        if (!rtxtr.loadFromFile("../assets/tile054.png")) {
+            std::cout << "Failed to load right tile texture!" << std::endl;
+            return false;
+        }
+        if (!btmtxtr.loadFromFile("../assets/tile066.png")) {
+            std::cout << "Failed to load bottom tile texture!" << std::endl;
+            return false;
+        }
+        if (!btmltxtr.loadFromFile("../assets/tile065.png")) {
+            std::cout << "Failed to load bottom left tile texture!" << std::endl;
+            return false;
+        }
+        if (!btmrtxtr.loadFromFile("../assets/tile067.png")) {
+            std::cout << "Failed to load bottom right tile texture!" << std::endl;
+            return false;
+        }
+
+        generateMap();
         return true;
     }
-    
-    // Generate the complete map layout
+
+    // Generate a map filled with duplicated tiles
     void generateMap() {
-        // Setup random number generation
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<> pathChance(0, 1);
-        
-        // Calculate total map size including void border
-        int totalWidth = MAP_WIDTH + 2 * VOID_BORDER;
-        int totalHeight = MAP_HEIGHT + 2 * VOID_BORDER;
-        
-        // Initialize map data with void tiles
-        std::vector<std::vector<int>> mapData(totalHeight, std::vector<int>(totalWidth, 2));
-        
-        // Create temporary array for path generation
-        std::vector<std::vector<bool>> paths(MAP_HEIGHT, std::vector<bool>(MAP_WIDTH, false));
-        
-        // Phase 1: Initial random path placement
-        for (int y = 0; y < MAP_HEIGHT; ++y) {
-            for (int x = 0; x < MAP_WIDTH; ++x) {
-                // 20% chance for initial path placement
-                if (pathChance(gen) < 0.2) {
-                    paths[y][x] = true;
+    tiles.clear();
+    stiles.clear();
+    toptiles.clear();
+    tltiles.clear();
+    trtiles.clear();
+    ltiles.clear();
+    rtiles.clear();
+    btmtiles.clear();
+    btmltiles.clear();
+    btmrtiles.clear();
+
+    for (int y = 0; y < Map_boundary_height; ++y) {
+        for (int x = 0; x < Map_boundary_width; ++x) {
+            sf::Sprite tile;
+            
+            
+            if (y == map_lowerbound_height || y == MAP_HEIGHT - 1) {
+                // Top and bottom border tiles
+                if (x == map_lowerbound_width && y == map_lowerbound_height) {
+                    tile.setTexture(tltxtr);
+                    tile.setPosition(x * TILE_SIZE, y * TILE_SIZE);
+                    tltiles.push_back(tile);
+                } else if (y == map_lowerbound_height && x == MAP_WIDTH - 1) {
+                    tile.setTexture(trtxtr);
+                    tile.setPosition(x * TILE_SIZE, y * TILE_SIZE);
+                    trtiles.push_back(tile);
+                } else if (y == map_lowerbound_height && x < MAP_WIDTH && x > map_lowerbound_width) {
+                    tile.setTexture(toptxtr);
+                    tile.setPosition(x * TILE_SIZE, y * TILE_SIZE);
+                    toptiles.push_back(tile);
+                } 
+                 else if (y == MAP_HEIGHT -1 && x > map_lowerbound_width && x < MAP_WIDTH - 1) {
+                    tile.setTexture(btmtxtr);
+                    tile.setPosition(x * TILE_SIZE, y * TILE_SIZE);
+                    btmtiles.push_back(tile); 
+                 }
+                else if (y == MAP_HEIGHT -1 && x == map_lowerbound_width) {
+                    tile.setTexture(btmltxtr);
+                    tile.setPosition(x * TILE_SIZE, y * TILE_SIZE);
+                    btmltiles.push_back(tile); 
                 }
-            }
-        }
-        
-        // Phase 2: Path smoothing using cellular automata
-        for (int iteration = 0; iteration < 3; ++iteration) {
-            auto newPaths = paths;
-            for (int y = 0; y < MAP_HEIGHT; ++y) {
-                for (int x = 0; x < MAP_WIDTH; ++x) {
-                    // Count neighboring paths
-                    int neighbors = 0;
-                    for (int dy = -1; dy <= 1; ++dy) {
-                        for (int dx = -1; dx <= 1; ++dx) {
-                            int nx = x + dx;
-                            int ny = y + dy;
-                            if (nx >= 0 && nx < MAP_WIDTH && ny >= 0 && ny < MAP_HEIGHT) {
-                                if (paths[ny][nx]) neighbors++;
-                            }
-                        }
-                    }
-                    // Apply cellular automata rules
-                    newPaths[y][x] = (neighbors >= 5); // Path survives/created if enough neighbors
+                else if (y == MAP_HEIGHT -1 && x == MAP_WIDTH - 1) {
+                    tile.setTexture(btmrtxtr);
+                    tile.setPosition(x * TILE_SIZE, y * TILE_SIZE);
+                    btmrtiles.push_back(tile); 
                 }
-            }
-            paths = newPaths;
-        }
-        
-        // Phase 3: Transfer path data to main map
-        for (int y = 0; y < MAP_HEIGHT; ++y) {
-            for (int x = 0; x < MAP_WIDTH; ++x) {
-                // Add VOID_BORDER offset when placing tiles
-                mapData[y + VOID_BORDER][x + VOID_BORDER] = paths[y][x] ? 1 : 0;
-            }
-        }
-        
-        // Phase 4: Create sprites for visualization
-        mapSprites.clear();  // Clear existing sprites
-        for (int y = 0; y < totalHeight; ++y) {
-            for (int x = 0; x < totalWidth; ++x) {
-                sf::Sprite tile;
-                tile.setTexture(tilesetTexture);
-                
-                // Get tile properties from tiles vector
-                TileType selectedTile = tiles[mapData[y][x]];
-                
-                // Set the correct texture region for this tile
-                tile.setTextureRect(sf::IntRect(
-                    selectedTile.x * TILE_SIZE,
-                    selectedTile.y * TILE_SIZE,
-                    TILE_SIZE,
-                    TILE_SIZE
-                ));
-                
-                // Position the tile in world space
+                else {
+                    
+                    tile.setTexture(space);
+                    tile.setPosition(x * TILE_SIZE, y * TILE_SIZE);
+                    stiles.push_back(tile);
+                }
+            } else if (x == map_lowerbound_width and y < MAP_HEIGHT && y > map_lowerbound_height) {
+                // Left border tiles
+                tile.setTexture(ltxtr);
                 tile.setPosition(x * TILE_SIZE, y * TILE_SIZE);
-                tile.setColor(selectedTile.tint);  // Apply color tint
-                mapSprites.push_back(tile);
+                ltiles.push_back(tile);
+            } else if (x == MAP_WIDTH - 1 && y < MAP_HEIGHT && y > map_lowerbound_height) {
+                // Right border tiles
+                tile.setTexture(rtxtr);
+                tile.setPosition(x * TILE_SIZE, y * TILE_SIZE);
+                rtiles.push_back(tile);
+            } else if (x < MAP_WIDTH && y < MAP_HEIGHT && x > map_lowerbound_width && y > map_lowerbound_height) {
+                // Inner tiles
+                tile.setTexture(texture);
+                tile.setPosition(x * TILE_SIZE, y * TILE_SIZE);
+                tiles.push_back(tile);
+            } else {
+                // Space tiles outside the main map boundaries
+                
+                tile.setTexture(space);
+                tile.setPosition(x * TILE_SIZE, y * TILE_SIZE);
+                stiles.push_back(tile);
             }
         }
     }
-    
-    // Update camera position and zoom based on input
-    void updateCamera(float deltaTime, const sf::RenderWindow& window) {
-        float moveSpeed = cameraSpeed * deltaTime;  // Time-based movement
-        
-        // Handle keyboard input for camera movement
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+}
+
+    // Update camera position based on input
+    void updateCamera(float deltaTime, const sf::RenderWindow &window) {
+        float moveSpeed = cameraSpeed * deltaTime;
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
             camera.move(-moveSpeed, 0);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
             camera.move(moveSpeed, 0);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
             camera.move(0, -moveSpeed);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
             camera.move(0, moveSpeed);
-        }
-        
-        // Handle camera zoom
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z)) {
-            camera.zoom(1.0f - deltaTime);    // Zoom in
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::X)) {
-            camera.zoom(1.0f + deltaTime);    // Zoom out
-        }
-    }
+
+        // Calculate the boundaries of the map
     
-    // Draw the map to the window
-    void draw(sf::RenderWindow& window) {
-        window.setView(camera);              // Apply camera transformation
-        for (const auto& sprite : mapSprites) {
-            window.draw(sprite);             // Draw each tile
+    float leftBound = map_lowerbound_width*TILE_SIZE;
+    float rightBound = MAP_WIDTH*TILE_SIZE;
+    float topBound = map_lowerbound_height*TILE_SIZE;
+    float bottomBound = MAP_HEIGHT*TILE_SIZE;
+
+    // Clamp the camera position within the map boundaries
+    sf::Vector2f cameraCenter = camera.getCenter();
+    cameraCenter.x = std::max(leftBound, std::min(cameraCenter.x, rightBound));
+    cameraCenter.y = std::max(topBound, std::min(cameraCenter.y, bottomBound));
+    camera.setCenter(cameraCenter);
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
+            camera.zoom(0.99f);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::X))
+            camera.zoom(1.01f);
+    }
+
+    // Draw the map
+    void draw(sf::RenderWindow &window) {
+        window.setView(camera);
+
+        for (const auto &tile : tiles) {
+            window.draw(tile);
+        }
+        for (const auto &tile : stiles) {
+            window.draw(tile);
+        }
+        for (const auto &tile : toptiles) {
+            window.draw(tile);
+        }
+        for (const auto &tile : tltiles) {
+            window.draw(tile);
+        }
+        for (const auto &tile : trtiles) {
+            window.draw(tile);
+        }
+        for (const auto &tile : ltiles) {
+            window.draw(tile);
+        }
+        for (const auto &tile : rtiles) {
+            window.draw(tile);
+        }
+        for (const auto &tile : btmtiles) {
+            window.draw(tile);
+        }
+        for (const auto &tile : btmltiles) {
+            window.draw(tile);
+        }
+        for (const auto &tile : btmrtiles) {
+            window.draw(tile);
         }
     }
 };
 
-// Main program entry point
 int main() {
-    // Window setup
     const int WINDOW_WIDTH = 1280;
     const int WINDOW_HEIGHT = 720;
-    
-    // Create the main window
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Enhanced Grass Tilemap");
+
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Duplicated Tilemap");
     window.setFramerateLimit(60);
-    
-    // Create and initialize the map
+
     TileMap map(sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT));
     if (!map.initialize()) {
-        std::cout << "Failed to initialize the map!" << std::endl;
-        system("pause");
+        std::cout << "Failed to initialize the tilemap!" << std::endl;
         return 1;
     }
-    
-    // Clock for timing
+
     sf::Clock clock;
-    
-    // Main game loop
+
     while (window.isOpen()) {
-        // Calculate frame time
         float deltaTime = clock.restart().asSeconds();
-        
-        // Event handling
+
         sf::Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed || 
+            if (event.type == sf::Event::Closed ||
                 (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)) {
                 window.close();
             }
         }
-        
-        // Update game state
+
         map.updateCamera(deltaTime, window);
-        
-        // Render
+
         window.clear(sf::Color::Black);
         map.draw(window);
         window.display();
     }
-    
+
     return 0;
 }
