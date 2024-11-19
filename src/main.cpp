@@ -30,8 +30,8 @@ private:
     const int TILE_SIZE = 32;  // Size of each tile in pixels
     const int MAP_WIDTH = 40*2;  // Number of tiles horizontally
     const int MAP_HEIGHT = 30*2; // Number of tiles vertically
-    int map_lowerbound_width  = 40;
-    int map_lowerbound_height = 30;
+    int map_lowerbound_width  = MAP_WIDTH / 2;
+    int map_lowerbound_height = MAP_HEIGHT / 2;
     int Map_boundary_width = MAP_WIDTH * 4;
     int Map_boundary_height = MAP_HEIGHT * 4;
 
