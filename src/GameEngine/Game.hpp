@@ -24,10 +24,7 @@ class Game {
 public:
     Game(unsigned int width, unsigned int height, const string &title);
     Game(const string &title);
-
-private:
-    void run();
-
+    void run() const;
 };
 
 

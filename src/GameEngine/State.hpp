@@ -5,8 +5,6 @@
 #ifndef STATE_HPP
 #define STATE_HPP
 
-
-
 class State {
 public:
     virtual ~State() = default;
@@ -17,7 +15,5 @@ public:
     virtual void pause() {}
     virtual void resume() {}
 };
-
-
 
 #endif //STATE_HPP

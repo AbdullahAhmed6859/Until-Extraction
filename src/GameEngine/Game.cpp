@@ -6,17 +6,15 @@ Game::Game(const unsigned int width, const unsigned int height, const string &ti
     data = std::make_shared<GameData>();
     data->window.create(sf::VideoMode(width, height), title);
     data->fsm.addState(StateRef(new SplashScreenState(data)));
-    run();
 }
 
 Game::Game(const string &title) : dt(1.0 / 60.0) {
     data = std::make_shared<GameData>();
     data->window.create(sf::VideoMode::getDesktopMode(), title, sf::Style::Fullscreen);
     data->fsm.addState(StateRef(new SplashScreenState(data)));
-    run();
 }
 
-void Game::run() {
+void Game::run() const {
     float currentTime = clock.getElapsedTime().asSeconds();
     float acc = 0.0;
 

@@ -3,12 +3,14 @@
 #include "../GameEngine/Game.hpp"
 #include "../GameEngine/State.hpp"
 
-class SplashScreenState : public State{
+class SplashScreenState final : public State{
     GameDataRef data;
     sf::Clock clock;
     sf::Sprite background;
+    sf::Vector2f scale;
+    sf::Vector2f scaleSpeed;
 public:
-    explicit SplashScreenState(GameDataRef data);
+    SplashScreenState(GameDataRef data);
     void init();
     void handleInput();
     void update(float dt);

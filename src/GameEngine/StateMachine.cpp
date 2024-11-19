@@ -32,7 +32,7 @@ void StateMachine::processStateChanges() {
                 states.top()->pause();
         }
         // Use std::move here
-        states.push(std::move(newState));  // Changed this line
+        states.push(std::move(newState));
         states.top()->init();
         isAdding = false;
     }
