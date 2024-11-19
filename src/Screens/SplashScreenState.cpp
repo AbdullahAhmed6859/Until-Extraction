@@ -34,7 +34,7 @@ void SplashScreenState::init() {
 void SplashScreenState::handleInput() {
     sf::Event event{};
     while (data->window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed || sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
+        if (InputManager::isClosedEvent(event) || InputManager::isEscPressed()) {
             data->window.close();
         }
     }

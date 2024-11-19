@@ -21,3 +21,11 @@ bool InputManager::isSpriteClicked(const sf::Sprite& object, const sf::Mouse::Bu
 sf::Vector2i InputManager::getMousePosition(sf::RenderWindow& window) {
     return sf::Mouse::getPosition(window);
 }
+
+bool InputManager::isClosedEvent(const sf::Event &event) {
+    return event.type == sf::Event::Closed;
+}
+
+bool InputManager::isEscPressed() {
+    return sf::Keyboard::isKeyPressed(sf::Keyboard::Escape);
+}

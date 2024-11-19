@@ -12,7 +12,7 @@ void AssetManager::loadTexture(const string& name, const string& fileName) {
 
 void AssetManager::loadFont(const string& name, const string& fileName) {
     sf::Font font;
-    if (font.loadFromFile(fileName)) {
+    if (font.loadFromFile("../assets/fonts/" + fileName)) {
         fonts[name] = font;
     }
 }
