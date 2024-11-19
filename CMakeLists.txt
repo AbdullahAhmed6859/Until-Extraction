@@ -43,7 +43,10 @@ add_executable(main src/main.cpp
         src/GameEngine/Game.cpp
         src/GameEngine/Game.hpp
         src/Screens/SplashScreenState.cpp
-        src/Screens/SplashScreenState.hpp)
+        src/Screens/SplashScreenState.hpp
+        src/Screens/MainMenuState.cpp
+        src/Screens/MainMenuState.hpp
+)
 
 target_link_libraries(main PRIVATE sfml-graphics)
 target_compile_features(main PRIVATE cxx_std_17)

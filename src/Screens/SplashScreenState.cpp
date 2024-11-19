@@ -15,14 +15,14 @@ void SplashScreenState::init() {
     background.setTexture(data->assets.getTexture("splashScreen"));
 
     // Get the size of the window
-    sf::Vector2u windowSize = data->window.getSize();
+    const sf::Vector2u windowSize = data->window.getSize();
 
     // Get the size of the texture
-    sf::Vector2u textureSize = data->assets.getTexture("splashScreen").getSize();
+    const sf::Vector2u textureSize = data->assets.getTexture("splashScreen").getSize();
 
     // Calculate scale factors
-    float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
-    float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
+    const float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
+    const float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
 
     // Scale the sprite to fit the window
     background.setScale(scaleX, scaleY);
