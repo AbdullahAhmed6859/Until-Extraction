@@ -18,7 +18,7 @@ void AssetManager::loadFont(const string& name, const string& fileName) {
 }
 
 void AssetManager::loadSound(const string& name, const string& fileName) {
-    sounds[name] = fileName;
+    sounds[name] = "../assets/audio/" + fileName;
 }
 
 sf::Texture& AssetManager::getTexture(const string& name) {

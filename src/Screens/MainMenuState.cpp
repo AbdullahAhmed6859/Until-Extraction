@@ -7,6 +7,7 @@ MainMenuState::MainMenuState(GameDataRef data) : data(std::move(data)) {
 
 void MainMenuState::init() {
     data->assets.loadTexture("mainScreen", "start_screen.png");
+    data->assets.loadSound("mainSound", "main_screen.wav");
     background.setTexture(data->assets.getTexture("mainScreen"));
 
     const sf::Vector2f windowSize(
@@ -28,6 +29,9 @@ void MainMenuState::init() {
         static_cast<float>(textureSize.y) / 2.0f);
     background.setPosition(static_cast<float>(windowSize.x) / 2.0f,
         static_cast<float>(windowSize.y) / 2.0f);
+
+    data->sound.openFromFile(data->assets.getSound("mainSound"));
+    data->sound.play();
 }
 
 void MainMenuState::handleInput() {
@@ -37,13 +41,14 @@ void MainMenuState::handleInput() {
             data->window.close();
         }
     }
+    if (InputManager::isEnterPressed()) {
+        std::cout << "go to Game" << std::endl;
+        data->sound.stop();
+        // data->fsm.addState(StateRef(new GameState(data)), true);
+    }
 }
 
 void MainMenuState::update(const float dt) {
-    if (InputManager::isEnterPressed()) {
-        std::cout << "go to Game" << std::endl;
-        // data->fsm.addState(StateRef(new GameState(data)), true);
-    }
 }
 
 void MainMenuState::render(float dt) {

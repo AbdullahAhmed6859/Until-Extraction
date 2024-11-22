@@ -11,6 +11,7 @@ SplashScreenState::SplashScreenState(GameDataRef data) : data(std::move(data)) {
 
 void SplashScreenState::init() {
     data->assets.loadTexture("splashScreen", "splash_screen.jpg");
+    data->assets.loadSound("splashSound", "splashScreen.wav");
 
     background.setTexture(data->assets.getTexture("splashScreen"));
 
@@ -32,6 +33,9 @@ void SplashScreenState::init() {
         static_cast<float>(textureSize.y) / 2.0f);
     background.setPosition(static_cast<float>(windowSize.x) / 2.0f,
         static_cast<float>(windowSize.y) / 2.0f);
+
+    data->sound.openFromFile(data->assets.getSound("splashSound"));
+    data->sound.play();
 }
 
 void SplashScreenState::handleInput() {
@@ -48,6 +52,7 @@ void SplashScreenState::update(const float dt) {
 
     if (clock.getElapsedTime().asSeconds() >= SPLASH_SCREEN_DURATION) {
         std::cout << "go to main menu" << std::endl;
+        data->sound.stop();
         data->fsm.addState(StateRef(new MainMenuState(data)), true);
     } else {
         scale += scaleSpeed * dt;

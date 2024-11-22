@@ -1,10 +1,11 @@
 #ifndef GAME_HPP
 #define GAME_HPP
-#include <SFML/Graphics.hpp>
-#include <string>
 #include "AssetManager.hpp"
 #include "InputManager.hpp"
+#include "SFML/Audio/Music.hpp"
 #include "StateMachine.hpp"
+#include <SFML/Graphics.hpp>
+#include <string>
 using std::string;
 
 struct GameData {
@@ -12,6 +13,7 @@ struct GameData {
     sf::RenderWindow window;
     AssetManager assets;
     InputManager input;
+    sf::Music sound;
 };
 
 typedef std::shared_ptr<GameData> GameDataRef;
@@ -24,6 +26,7 @@ class Game {
 public:
     Game(unsigned int width, unsigned int height, const string &title);
     Game(const string &title);
+    ~Game();
     void run() const;
 };
 
