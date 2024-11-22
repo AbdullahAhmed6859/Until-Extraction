@@ -11,6 +11,7 @@ public:
     static sf::Vector2i getMousePosition(sf::RenderWindow &window);
     static bool isClosedEvent(const sf::Event &event);
     static bool isEscPressed();
+    static bool isEnterPressed();
 };
 
 

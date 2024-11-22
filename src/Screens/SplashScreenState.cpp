@@ -1,4 +1,7 @@
 #include "SplashScreenState.hpp"
+
+#include "MainMenuState.hpp"
+
 #include <iostream>
 #include <utility>
 
@@ -45,7 +48,7 @@ void SplashScreenState::update(const float dt) {
 
     if (clock.getElapsedTime().asSeconds() >= SPLASH_SCREEN_DURATION) {
         std::cout << "go to main menu" << std::endl;
-        // data->fsm.addState(StateRef(new MainMenuState(data)), true);
+        data->fsm.addState(StateRef(new MainMenuState(data)), true);
     } else {
         scale += scaleSpeed * dt;
         scaleSpeed = scaleSpeed * 0.99f;

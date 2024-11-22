@@ -29,3 +29,7 @@ bool InputManager::isClosedEvent(const sf::Event &event) {
 bool InputManager::isEscPressed() {
     return sf::Keyboard::isKeyPressed(sf::Keyboard::Escape);
 }
+
+bool InputManager::isEnterPressed() {
+    return sf::Keyboard::isKeyPressed(sf::Keyboard::Enter);
+}
