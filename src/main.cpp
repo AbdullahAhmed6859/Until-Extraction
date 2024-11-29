@@ -24,6 +24,10 @@ private:
     sf::Texture hero5;
     sf::Texture hero6;
     sf::Texture hero7;
+    sf::Texture shoot;
+    sf::Texture shoot2;
+    sf::Texture shoot3;
+    sf::Texture shoot4;
     std::vector<sf::Sprite> tiles; // Container for all map tiles
     std::vector<sf::Sprite> stiles;
     std::vector<sf::Sprite> toptiles;
@@ -42,7 +46,7 @@ private:
 
     float animationTimer = 0.0f;
     int currentFrame = 0;
-    const float FRAME_TIME = 0.1f; // Time between frame changes
+    const float FRAME_TIME = 0.2f; // Time between frame changes
     bool isMoving = false;
 
     enum Direction { Left, Right };
@@ -63,6 +67,14 @@ private:
 
     const int HERO_WIDTH = 38;
     const int HERO_HEIGHT = 26;
+
+    bool isShooting = false;
+    int shootFrame = 0;
+    const float SHOOT_FRAME_TIME = 0.07f; // Faster than walking animation
+    float shootTimer = 0.0f;
+
+    const int SHOOT_WIDTH = 50;
+    const int SHOOT_HEIGHT = 26;
 
 public:
     // Constructor: Initialize camera with the given view size
@@ -117,31 +129,47 @@ public:
             return false;
         }
         if (!hero.loadFromFile("../assets/tile028.png")) {
-            std::cout << "Failed to load bottom right hero!" << std::endl;
+            std::cout << "Failed to load hero!" << std::endl;
             return false;
         }
         if (!hero2.loadFromFile("../assets/tile004.png")) {
-            std::cout << "Failed to load bottom right hero2!" << std::endl;
+            std::cout << "Failed to load hero2!" << std::endl;
             return false;
         }
         if (!hero3.loadFromFile("../assets/tile008.png")) {
-            std::cout << "Failed to load bottom right hero3!" << std::endl;
+            std::cout << "Failed to load hero3!" << std::endl;
             return false;
         }
         if (!hero4.loadFromFile("../assets/tile012.png")) {
-            std::cout << "Failed to load bottom right hero4!" << std::endl;
+            std::cout << "Failed to load hero4!" << std::endl;
             return false;
         }
         if (!hero5.loadFromFile("../assets/tile016.png")) {
-            std::cout << "Failed to load bottom right hero5!" << std::endl;
+            std::cout << "Failed to load hero5!" << std::endl;
             return false;
         }
-        if (!hero6.loadFromFile("../assets/tile000.png")) {
-            std::cout << "Failed to load bottom right hero6!" << std::endl;
+        if (!hero6.loadFromFile("../assets/tile020.png")) {
+            std::cout << "Failed to load hero6!" << std::endl;
             return false;
         }
         if (!hero7.loadFromFile("../assets/tile024.png")) {
-            std::cout << "Failed to load bottom right hero7!" << std::endl;
+            std::cout << "Failed to load hero7!" << std::endl;
+            return false;
+        }
+        if (!shoot.loadFromFile("../assets/shoot.png")) {
+            std::cout << "Failed to load shoot animation!" << std::endl;
+            return false;
+        }
+        if (!shoot2.loadFromFile("../assets/shoot2.png")) {
+            std::cout << "Failed to load shoot2 animation!" << std::endl;
+            return false;
+        }
+        if (!shoot3.loadFromFile("../assets/shoot3.png")) {
+            std::cout << "Failed to load shoot3 animation!" << std::endl;
+            return false;
+        }
+        if (!shoot4.loadFromFile("../assets/shoot4.png")) {
+            std::cout << "Failed to load shoot4 animation!" << std::endl;
             return false;
         }
 
@@ -243,64 +271,120 @@ public:
         float moveDistance = heroSpeed * deltaTime;
         bool moved = false;
         
-        // Update animation timer
+        // Update both animation timers
         animationTimer += deltaTime;
-        
-        // Reset animation if not moving
-        if (!isMoving) {
+        shootTimer += deltaTime;
+
+        // Handle shooting
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !isShooting) {
+            isShooting = true;
+            shootFrame = 0;
+            shootTimer = 0.0f;
+        }
+
+        // Process shooting animation
+        if (isShooting) {
+            if (shootTimer >= SHOOT_FRAME_TIME) {
+                shootTimer = 0;
+                // Cycle through shooting frames while maintaining hero dimensions
+                switch (shootFrame) {
+                    case 0: 
+                        heroSprite.setTexture(shoot);
+                        heroSprite.setOrigin(HERO_WIDTH / 2.0f, HERO_HEIGHT / 2.0f);
+                        heroSprite.setScale((static_cast<float>(TILE_SIZE) / HERO_WIDTH) * 
+                            (currentDirection == Left ? -1.0f : 1.0f),
+                            static_cast<float>(TILE_SIZE) / HERO_HEIGHT);
+                        break;
+                    case 1: 
+                        heroSprite.setTexture(shoot2);
+                        heroSprite.setOrigin(HERO_WIDTH / 2.0f, HERO_HEIGHT / 2.0f);
+                        heroSprite.setScale((static_cast<float>(TILE_SIZE) / HERO_WIDTH) * 
+                            (currentDirection == Left ? -1.0f : 1.0f),
+                            static_cast<float>(TILE_SIZE) / HERO_HEIGHT);
+                        break;
+                    case 2: 
+                        heroSprite.setTexture(shoot3);
+                        heroSprite.setOrigin(HERO_WIDTH / 2.0f, HERO_HEIGHT / 2.0f);
+                        heroSprite.setScale((static_cast<float>(TILE_SIZE) / HERO_WIDTH) * 
+                            (currentDirection == Left ? -1.0f : 1.0f),
+                            static_cast<float>(TILE_SIZE) / HERO_HEIGHT);
+                        break;
+                    case 3: 
+                        heroSprite.setTexture(shoot4);
+                        heroSprite.setOrigin(HERO_WIDTH / 2.0f, HERO_HEIGHT / 2.0f);
+                        heroSprite.setScale((static_cast<float>(TILE_SIZE) / HERO_WIDTH) * 
+                            (currentDirection == Left ? -1.0f : 1.0f),
+                            static_cast<float>(TILE_SIZE) / HERO_HEIGHT);
+                        break;
+                }
+                shootFrame++;
+                
+                // End shooting animation after 4 frames
+                if (shootFrame >= 4) {
+                    isShooting = false;
+                    heroSprite.setTexture(hero);
+                    heroSprite.setOrigin(HERO_WIDTH / 2.0f, HERO_HEIGHT / 2.0f);
+                    heroSprite.setScale((static_cast<float>(TILE_SIZE) / HERO_WIDTH) * 
+                        (currentDirection == Left ? -1.0f : 1.0f),
+                        static_cast<float>(TILE_SIZE) / HERO_HEIGHT);
+                }
+            }
+        }
+        // Only do walking animation if not shooting
+        else if (!isMoving) {
             currentFrame = 0;
             heroSprite.setTexture(hero);
         }
 
         // Track horizontal direction
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {  // Left
             currentDirection = Left;
             heroSprite.setScale(-std::abs(heroSprite.getScale().x), heroSprite.getScale().y);
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {  // Right
             currentDirection = Right;
             heroSprite.setScale(std::abs(heroSprite.getScale().x), heroSprite.getScale().y);
         }
 
         // Diagonal movement
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
             heroPosition += sf::Vector2f(-moveDistance / sqrt(2), -moveDistance / sqrt(2));
             moved = true;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
             heroPosition += sf::Vector2f(moveDistance / sqrt(2), -moveDistance / sqrt(2));
             moved = true;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
             heroPosition += sf::Vector2f(-moveDistance / sqrt(2), moveDistance / sqrt(2));
             moved = true;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
             heroPosition += sf::Vector2f(moveDistance / sqrt(2), moveDistance / sqrt(2));
             moved = true;
         }
         // Cardinal movement
         else {
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {  // Left
                 heroPosition.x -= moveDistance;
                 moved = true;
             }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {  // Right
                 heroPosition.x += moveDistance;
                 moved = true;
             }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {  // Up
                 heroPosition.y -= moveDistance;
                 moved = true;
             }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {  // Down
                 heroPosition.y += moveDistance;
                 moved = true;
             }
         }
 
         // Handle animation with direction
-        if (moved) {
+        if (moved && !isShooting) {
             isMoving = true;
             if (animationTimer >= FRAME_TIME) {
                 animationTimer = 0;
@@ -321,7 +405,7 @@ public:
                 float scaleX = std::abs(heroSprite.getScale().x);
                 heroSprite.setScale(currentDirection == Left ? -scaleX : scaleX, heroSprite.getScale().y);
             }
-        } else {
+        } else if (!isShooting) {
             isMoving = false;
         }
 
