@@ -28,6 +28,12 @@ private:
     sf::Texture shoot2;
     sf::Texture shoot3;
     sf::Texture shoot4;
+    sf::Texture idle;
+    sf::Texture wake1;
+    sf::Texture wake2;
+    sf::Texture wake3;
+    sf::Texture wake4;
+
     std::vector<sf::Sprite> tiles; // Container for all map tiles
     std::vector<sf::Sprite> stiles;
     std::vector<sf::Sprite> toptiles;
@@ -76,13 +82,26 @@ private:
     const int SHOOT_WIDTH = 50;
     const int SHOOT_HEIGHT = 26;
 
+    enum class GameState {
+        Running,
+        Pausing,
+        Paused,
+        Resuming
+    };
+    GameState gameState = GameState::Running;
+    float wakeTimer = 0.0f;
+    int wakeFrame = 0;
+    const float WAKE_FRAME_TIME = 0.2f;
+    bool hasCompletedStartup = false;
+
 public:
     // Constructor: Initialize camera with the given view size
-    TileMap(const sf::Vector2f &viewSize){
+    TileMap(const sf::Vector2f &viewSize) {
     float centerX = ((MAP_WIDTH + map_lowerbound_width)/2) * TILE_SIZE;
     float centerY = ((MAP_HEIGHT + map_lowerbound_height)/2) * TILE_SIZE;
     heroPosition = sf::Vector2f(centerX + TILE_SIZE/2, centerY + TILE_SIZE/2);
     camera.setCenter(centerX + TILE_SIZE/2, centerY + TILE_SIZE/2);
+    gameState = GameState::Running;  // Start directly in running state
 }
 
     // Initialize the tilemap and load resources
@@ -128,7 +147,7 @@ public:
             std::cout << "Failed to load bottom right tile texture!" << std::endl;
             return false;
         }
-        if (!hero.loadFromFile("../assets/tile028.png")) {
+        if (!hero.loadFromFile("../assets/tile0001.png")) {
             std::cout << "Failed to load hero!" << std::endl;
             return false;
         }
@@ -172,9 +191,28 @@ public:
             std::cout << "Failed to load shoot4 animation!" << std::endl;
             return false;
         }
+        if(!idle.loadFromFile("../assets/idle.png")) {
+            std::cout << "Failed to load idle animation!" << std::endl;
+            return false;
+        }
+        if(!wake1.loadFromFile("../assets/wake1.png")) {
+            std::cout << "Failed to load wake1 animation!" << std::endl;
+            return false;
+        }
+        if(!wake2.loadFromFile("../assets/wake2.png")) {
+            std::cout << "Failed to load wake2 animation!" << std::endl;
+            return false;
+        }
+        if(!wake3.loadFromFile("../assets/wake3.png")) {
+            std::cout << "Failed to load wake3 animation!" << std::endl;
+            return false;
+        }
+        if(!wake4.loadFromFile("../assets/wake4.png")) {
+            std::cout << "Failed to load wake4 animation!" << std::endl;
+            return false;
+        }
 
-        heroSprite.setTexture(hero);
-        // Center the sprite origin
+        heroSprite.setTexture(hero);  // Start with hero texture
         heroSprite.setOrigin(HERO_WIDTH / 2.0f, HERO_HEIGHT / 2.0f);
 
         // Set scale to match tile size if desired
@@ -268,6 +306,69 @@ public:
 
     // Update camera position based on input
     void updateHeroAndCamera(float deltaTime) {
+        static bool escapeReleased = true;
+
+        // Handle pause toggle
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
+            if (escapeReleased) {
+                if (gameState == GameState::Running) {
+                    gameState = GameState::Pausing;
+                    wakeFrame = 0;
+                    wakeTimer = 0.0f;
+                } else if (gameState == GameState::Paused) {
+                    gameState = GameState::Resuming;
+                    wakeFrame = 0;
+                    wakeTimer = 0.0f;
+                }
+                escapeReleased = false;
+            }
+        } else {
+            escapeReleased = true;
+        }
+
+        // Handle pause animations
+        wakeTimer += deltaTime;
+
+        if (gameState == GameState::Pausing) {
+            if (wakeTimer >= WAKE_FRAME_TIME) {
+                wakeTimer = 0.0f;
+                switch (wakeFrame) {
+                    case 0: heroSprite.setTexture(wake4); break;
+                    case 1: heroSprite.setTexture(wake3); break;
+                    case 2: heroSprite.setTexture(wake2); break;
+                    case 3: heroSprite.setTexture(wake1); break;
+                    case 4: 
+                        heroSprite.setTexture(idle);
+                        gameState = GameState::Paused;
+                        break;
+                }
+                wakeFrame++;
+            }
+            return;
+        }
+
+        if (gameState == GameState::Resuming) {
+            if (wakeTimer >= WAKE_FRAME_TIME) {
+                wakeTimer = 0.0f;
+                switch (wakeFrame) {
+                    case 0: heroSprite.setTexture(wake1); break;
+                    case 1: heroSprite.setTexture(wake2); break;
+                    case 2: heroSprite.setTexture(wake3); break;
+                    case 3: heroSprite.setTexture(wake4); break;
+                    case 4: 
+                        heroSprite.setTexture(hero);
+                        gameState = GameState::Running;
+                        break;
+                }
+                wakeFrame++;
+            }
+            return;
+        }
+
+        if (gameState != GameState::Running) {
+            return;
+        }
+
         float moveDistance = heroSpeed * deltaTime;
         bool moved = false;
         
@@ -486,8 +587,7 @@ int main() {
 
         sf::Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed ||
-                (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)) {
+            if (event.type == sf::Event::Closed) {
                 window.close();
             }
         }
