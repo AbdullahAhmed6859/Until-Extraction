@@ -1,6 +1,8 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <cmath>
 
 class TileMap {
 private:
@@ -15,6 +17,13 @@ private:
     sf::Texture btmtxtr;
     sf::Texture btmltxtr;
     sf::Texture btmrtxtr;
+    sf::Texture hero;
+    sf::Texture hero2;
+    sf::Texture hero3;
+    sf::Texture hero4;
+    sf::Texture hero5;
+    sf::Texture hero6;
+    sf::Texture hero7;
     std::vector<sf::Sprite> tiles; // Container for all map tiles
     std::vector<sf::Sprite> stiles;
     std::vector<sf::Sprite> toptiles;
@@ -25,6 +34,19 @@ private:
     std::vector<sf::Sprite> btmtiles;
     std::vector<sf::Sprite> btmltiles;
     std::vector<sf::Sprite> btmrtiles;
+    
+
+    sf::Sprite heroSprite;
+    sf::Vector2f heroPosition;
+    float heroSpeed = 200.0f; // Pixels per second
+
+    float animationTimer = 0.0f;
+    int currentFrame = 0;
+    const float FRAME_TIME = 0.1f; // Time between frame changes
+    bool isMoving = false;
+
+    enum Direction { Left, Right };
+    Direction currentDirection = Right;
 
     // Map configuration
     const int TILE_SIZE = 32;  // Size of each tile in pixels
@@ -39,12 +61,16 @@ private:
     sf::View camera;            // SFML View for camera control
     float cameraSpeed = 500.0f; // Camera movement speed (pixels/second)
 
+    const int HERO_WIDTH = 38;
+    const int HERO_HEIGHT = 26;
+
 public:
     // Constructor: Initialize camera with the given view size
     TileMap(const sf::Vector2f &viewSize){
-    float centerX = ((MAP_WIDTH + map_lowerbound_width)/2 );
-    float centerY = ((MAP_HEIGHT + map_lowerbound_height)/2 );
-    camera.setCenter(centerX, centerY);
+    float centerX = ((MAP_WIDTH + map_lowerbound_width)/2) * TILE_SIZE;
+    float centerY = ((MAP_HEIGHT + map_lowerbound_height)/2) * TILE_SIZE;
+    heroPosition = sf::Vector2f(centerX + TILE_SIZE/2, centerY + TILE_SIZE/2);
+    camera.setCenter(centerX + TILE_SIZE/2, centerY + TILE_SIZE/2);
 }
 
     // Initialize the tilemap and load resources
@@ -90,6 +116,43 @@ public:
             std::cout << "Failed to load bottom right tile texture!" << std::endl;
             return false;
         }
+        if (!hero.loadFromFile("../assets/tile028.png")) {
+            std::cout << "Failed to load bottom right hero!" << std::endl;
+            return false;
+        }
+        if (!hero2.loadFromFile("../assets/tile004.png")) {
+            std::cout << "Failed to load bottom right hero2!" << std::endl;
+            return false;
+        }
+        if (!hero3.loadFromFile("../assets/tile008.png")) {
+            std::cout << "Failed to load bottom right hero3!" << std::endl;
+            return false;
+        }
+        if (!hero4.loadFromFile("../assets/tile012.png")) {
+            std::cout << "Failed to load bottom right hero4!" << std::endl;
+            return false;
+        }
+        if (!hero5.loadFromFile("../assets/tile016.png")) {
+            std::cout << "Failed to load bottom right hero5!" << std::endl;
+            return false;
+        }
+        if (!hero6.loadFromFile("../assets/tile000.png")) {
+            std::cout << "Failed to load bottom right hero6!" << std::endl;
+            return false;
+        }
+        if (!hero7.loadFromFile("../assets/tile024.png")) {
+            std::cout << "Failed to load bottom right hero7!" << std::endl;
+            return false;
+        }
+
+        heroSprite.setTexture(hero);
+        // Center the sprite origin
+        heroSprite.setOrigin(HERO_WIDTH / 2.0f, HERO_HEIGHT / 2.0f);
+
+        // Set scale to match tile size if desired
+        float scaleX = static_cast<float>(TILE_SIZE) / HERO_WIDTH;
+        float scaleY = static_cast<float>(TILE_SIZE) / HERO_HEIGHT;
+        heroSprite.setScale(scaleX, scaleY);
 
         generateMap();
         return true;
@@ -176,31 +239,105 @@ public:
 }
 
     // Update camera position based on input
-    void updateCamera(float deltaTime, const sf::RenderWindow &window) {
-        float moveSpeed = cameraSpeed * deltaTime;
+    void updateHeroAndCamera(float deltaTime) {
+        float moveDistance = heroSpeed * deltaTime;
+        bool moved = false;
+        
+        // Update animation timer
+        animationTimer += deltaTime;
+        
+        // Reset animation if not moving
+        if (!isMoving) {
+            currentFrame = 0;
+            heroSprite.setTexture(hero);
+        }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-            camera.move(-moveSpeed, 0);
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-            camera.move(moveSpeed, 0);
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-            camera.move(0, -moveSpeed);
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-            camera.move(0, moveSpeed);
+        // Track horizontal direction
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+            currentDirection = Left;
+            heroSprite.setScale(-std::abs(heroSprite.getScale().x), heroSprite.getScale().y);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+            currentDirection = Right;
+            heroSprite.setScale(std::abs(heroSprite.getScale().x), heroSprite.getScale().y);
+        }
 
-        // Calculate the boundaries of the map
-    
-    float leftBound = map_lowerbound_width*TILE_SIZE;
-    float rightBound = MAP_WIDTH*TILE_SIZE;
-    float topBound = map_lowerbound_height*TILE_SIZE;
-    float bottomBound = MAP_HEIGHT*TILE_SIZE;
+        // Diagonal movement
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+            heroPosition += sf::Vector2f(-moveDistance / sqrt(2), -moveDistance / sqrt(2));
+            moved = true;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+            heroPosition += sf::Vector2f(moveDistance / sqrt(2), -moveDistance / sqrt(2));
+            moved = true;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+            heroPosition += sf::Vector2f(-moveDistance / sqrt(2), moveDistance / sqrt(2));
+            moved = true;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+            heroPosition += sf::Vector2f(moveDistance / sqrt(2), moveDistance / sqrt(2));
+            moved = true;
+        }
+        // Cardinal movement
+        else {
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+                heroPosition.x -= moveDistance;
+                moved = true;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+                heroPosition.x += moveDistance;
+                moved = true;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+                heroPosition.y -= moveDistance;
+                moved = true;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+                heroPosition.y += moveDistance;
+                moved = true;
+            }
+        }
 
-    // Clamp the camera position within the map boundaries
-    sf::Vector2f cameraCenter = camera.getCenter();
-    cameraCenter.x = std::max(leftBound, std::min(cameraCenter.x, rightBound));
-    cameraCenter.y = std::max(topBound, std::min(cameraCenter.y, bottomBound));
-    camera.setCenter(cameraCenter);
+        // Handle animation with direction
+        if (moved) {
+            isMoving = true;
+            if (animationTimer >= FRAME_TIME) {
+                animationTimer = 0;
+                currentFrame = (currentFrame + 1) % 7;
+                
+                // Update texture based on current frame
+                switch (currentFrame) {
+                    case 0: heroSprite.setTexture(hero); break;
+                    case 1: heroSprite.setTexture(hero2); break;
+                    case 2: heroSprite.setTexture(hero3); break;
+                    case 3: heroSprite.setTexture(hero4); break;
+                    case 4: heroSprite.setTexture(hero5); break;
+                    case 5: heroSprite.setTexture(hero6); break;
+                    case 6: heroSprite.setTexture(hero7); break;
+                }
 
+                // Maintain direction
+                float scaleX = std::abs(heroSprite.getScale().x);
+                heroSprite.setScale(currentDirection == Left ? -scaleX : scaleX, heroSprite.getScale().y);
+            }
+        } else {
+            isMoving = false;
+        }
+
+        // Clamp hero position to map boundaries
+        heroPosition.x = std::max(static_cast<float>(map_lowerbound_width * TILE_SIZE + TILE_SIZE), 
+                                std::min(heroPosition.x, static_cast<float>((MAP_WIDTH - 1) * TILE_SIZE)));
+        heroPosition.y = std::max(static_cast<float>(map_lowerbound_height * TILE_SIZE + TILE_SIZE), 
+                                std::min(heroPosition.y, static_cast<float>((MAP_HEIGHT - 1) * TILE_SIZE)));
+
+        // Update hero sprite position
+        heroSprite.setPosition(heroPosition);
+
+        // Update camera to follow hero
+        camera.setCenter(heroPosition);
+
+        // Handle zoom
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
             camera.zoom(0.99f);
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::X))
@@ -241,6 +378,7 @@ public:
         for (const auto &tile : btmrtiles) {
             window.draw(tile);
         }
+        window.draw(heroSprite);
     }
 };
 
@@ -270,7 +408,7 @@ int main() {
             }
         }
 
-        map.updateCamera(deltaTime, window);
+        map.updateHeroAndCamera(deltaTime);
 
         window.clear(sf::Color::Black);
         map.draw(window);
