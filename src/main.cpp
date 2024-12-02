@@ -33,6 +33,7 @@ private:
     sf::Texture wake2;
     sf::Texture wake3;
     sf::Texture wake4;
+    sf::Texture spaceshipdmged;
 
     std::vector<sf::Sprite> tiles; // Container for all map tiles
     std::vector<sf::Sprite> stiles;
@@ -44,6 +45,7 @@ private:
     std::vector<sf::Sprite> btmtiles;
     std::vector<sf::Sprite> btmltiles;
     std::vector<sf::Sprite> btmrtiles;
+    std::vector<sf::Sprite> spaceshipdmg;
     
 
     sf::Sprite heroSprite;
@@ -94,14 +96,28 @@ private:
     const float WAKE_FRAME_TIME = 0.2f;
     bool hasCompletedStartup = false;
 
+    sf::Sprite spaceshipSprite;
+    sf::Vector2f spaceshipPosition;
+    const float SPACESHIP_WIDTH = 32.0f;  
+    const float SPACESHIP_HEIGHT = 32.0f;
+
+    const float COLLISION_RADIUS = 32.0f; // Collision radius for spaceship
+
 public:
     // Constructor: Initialize camera with the given view size
     TileMap(const sf::Vector2f &viewSize) {
+    // Set spaceship position near center of map
     float centerX = ((MAP_WIDTH + map_lowerbound_width)/2) * TILE_SIZE;
     float centerY = ((MAP_HEIGHT + map_lowerbound_height)/2) * TILE_SIZE;
-    heroPosition = sf::Vector2f(centerX + TILE_SIZE/2, centerY + TILE_SIZE/2);
-    camera.setCenter(centerX + TILE_SIZE/2, centerY + TILE_SIZE/2);
-    gameState = GameState::Running;  // Start directly in running state
+    spaceshipPosition = sf::Vector2f(centerX, centerY);
+    
+    // Set hero position to start to the right of spaceship
+    // Add TILE_SIZE * 2 to x position to place hero 2 tiles right of spaceship
+    heroPosition = sf::Vector2f(centerX + TILE_SIZE * 2, centerY);
+    
+    // Center camera on spaceship/hero position
+    camera.setCenter(centerX + TILE_SIZE, centerY);
+    gameState = GameState::Running;
 }
 
     // Initialize the tilemap and load resources
@@ -211,11 +227,28 @@ public:
             std::cout << "Failed to load wake4 animation!" << std::endl;
             return false;
         }
+        if(!spaceshipdmged.loadFromFile("../assets/spaceship.png")) {
+            std::cout << "Failed to load spaceshipdmged animation!" << std::endl;
+            return false;
+        }
 
-        heroSprite.setTexture(hero);  // Start with hero texture
-        heroSprite.setOrigin(HERO_WIDTH / 2.0f, HERO_HEIGHT / 2.0f);
+        // Setup spaceship sprite
+        spaceshipSprite.setTexture(spaceshipdmged);
+        spaceshipSprite.setOrigin(SPACESHIP_WIDTH/2, SPACESHIP_HEIGHT/2);
+        spaceshipSprite.setPosition(spaceshipPosition);
 
-        // Set scale to match tile size if desired
+        // Set scale to 1 to show at full size since texture is already 32x32
+        spaceshipSprite.setScale(1.0f, 1.0f);
+        
+        // Scale spaceship to match TILE_SIZE
+        // float shipScaleX = static_cast<float>(TILE_SIZE) / SPACESHIP_WIDTH;
+        // float shipScaleY = static_cast<float>(TILE_SIZE) / SPACESHIP_HEIGHT;
+        // spaceshipSprite.setScale(shipScaleX, shipScaleY);
+
+        // Setup hero at spaceship position
+        heroSprite.setTexture(hero);
+        heroSprite.setOrigin(HERO_WIDTH/2.0f, HERO_HEIGHT/2.0f);
+        heroSprite.setPosition(heroPosition);
         float scaleX = static_cast<float>(TILE_SIZE) / HERO_WIDTH;
         float scaleY = static_cast<float>(TILE_SIZE) / HERO_HEIGHT;
         heroSprite.setScale(scaleX, scaleY);
@@ -448,39 +481,69 @@ public:
         }
 
         // Diagonal movement
+        sf::Vector2f newPosition = heroPosition;
+
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-            heroPosition += sf::Vector2f(-moveDistance / sqrt(2), -moveDistance / sqrt(2));
-            moved = true;
+            newPosition += sf::Vector2f(-moveDistance / sqrt(2), -moveDistance / sqrt(2));
+            if (!wouldCollideWithSpaceship(newPosition)) {
+                heroPosition = newPosition;
+                moved = true;
+            }
         }
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-            heroPosition += sf::Vector2f(moveDistance / sqrt(2), -moveDistance / sqrt(2));
-            moved = true;
+            newPosition += sf::Vector2f(moveDistance / sqrt(2), -moveDistance / sqrt(2));
+            if (!wouldCollideWithSpaceship(newPosition)) {
+                heroPosition = newPosition;
+                moved = true;
+            }
         }
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-            heroPosition += sf::Vector2f(-moveDistance / sqrt(2), moveDistance / sqrt(2));
-            moved = true;
+            newPosition += sf::Vector2f(-moveDistance / sqrt(2), moveDistance / sqrt(2));
+            if (!wouldCollideWithSpaceship(newPosition)) {
+                heroPosition = newPosition;
+                moved = true;
+            }
         }
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-            heroPosition += sf::Vector2f(moveDistance / sqrt(2), moveDistance / sqrt(2));
-            moved = true;
+            newPosition += sf::Vector2f(moveDistance / sqrt(2), moveDistance / sqrt(2));
+            if (!wouldCollideWithSpaceship(newPosition)) {
+                heroPosition = newPosition;
+                moved = true;
+            }
         }
         // Cardinal movement
         else {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {  // Left
-                heroPosition.x -= moveDistance;
-                moved = true;
+                newPosition.x -= moveDistance;
+                if (!wouldCollideWithSpaceship(newPosition)) {
+                    heroPosition = newPosition;
+                    moved = true;
+                }
+                newPosition = heroPosition;
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {  // Right
-                heroPosition.x += moveDistance;
-                moved = true;
+                newPosition.x += moveDistance;
+                if (!wouldCollideWithSpaceship(newPosition)) {
+                    heroPosition = newPosition;
+                    moved = true;
+                }
+                newPosition = heroPosition;
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {  // Up
-                heroPosition.y -= moveDistance;
-                moved = true;
+                newPosition.y -= moveDistance;
+                if (!wouldCollideWithSpaceship(newPosition)) {
+                    heroPosition = newPosition;
+                    moved = true;
+                }
+                newPosition = heroPosition;
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {  // Down
-                heroPosition.y += moveDistance;
-                moved = true;
+                newPosition.y += moveDistance;
+                if (!wouldCollideWithSpaceship(newPosition)) {
+                    heroPosition = newPosition;
+                    moved = true;
+                }
+                newPosition = heroPosition;
             }
         }
 
@@ -529,6 +592,14 @@ public:
             camera.zoom(1.01f);
     }
 
+    // Add collision check method:
+    bool wouldCollideWithSpaceship(const sf::Vector2f& newPosition) {
+        float dx = newPosition.x - spaceshipPosition.x;
+        float dy = newPosition.y - spaceshipPosition.y;
+        float distance = std::sqrt(dx*dx + dy*dy);
+        return distance < COLLISION_RADIUS;
+    }
+
     // Draw the map
     void draw(sf::RenderWindow &window) {
         window.setView(camera);
@@ -563,6 +634,8 @@ public:
         for (const auto &tile : btmrtiles) {
             window.draw(tile);
         }
+        // Draw spaceship before hero
+        window.draw(spaceshipSprite);
         window.draw(heroSprite);
     }
 };
