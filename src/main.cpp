@@ -34,6 +34,9 @@ private:
     sf::Texture wake3;
     sf::Texture wake4;
     sf::Texture spaceshipdmged;
+    sf::Texture tree;
+    sf::Texture tree2;
+    sf::Texture tree3;
 
     std::vector<sf::Sprite> tiles; // Container for all map tiles
     std::vector<sf::Sprite> stiles;
@@ -46,6 +49,9 @@ private:
     std::vector<sf::Sprite> btmltiles;
     std::vector<sf::Sprite> btmrtiles;
     std::vector<sf::Sprite> spaceshipdmg;
+    std::vector<sf::Sprite> trees;
+    std::vector<sf::Sprite> trees2;
+    std::vector<sf::Sprite> trees3;
     
 
     sf::Sprite heroSprite;
@@ -102,6 +108,10 @@ private:
     const float SPACESHIP_HEIGHT = 32.0f;
 
     const float COLLISION_RADIUS = 32.0f; // Collision radius for spaceship
+
+    // Add tree dimensions as constants in private section:
+    const float TREE_WIDTH = 180.0f;
+    const float TREE_HEIGHT = 256.0f;
 
 public:
     // Constructor: Initialize camera with the given view size
@@ -231,6 +241,19 @@ public:
             std::cout << "Failed to load spaceshipdmged animation!" << std::endl;
             return false;
         }
+        if(!tree.loadFromFile("../assets/tree.png")) {
+            std::cout << "Failed to load tree animation!" << std::endl;
+            return false;
+        }
+        if(!tree2.loadFromFile("../assets/tree2.png")) {
+            std::cout << "Failed to load tree2 animation!" << std::endl;
+            return false;
+        }
+        if(!tree3.loadFromFile("../assets/tree3.png")) {
+            std::cout << "Failed to load tree3 animation!" << std::endl;
+            return false;
+        }
+        
 
         // Setup spaceship sprite
         spaceshipSprite.setTexture(spaceshipdmged);
@@ -254,6 +277,7 @@ public:
         heroSprite.setScale(scaleX, scaleY);
 
         generateMap();
+        createTrees();
         return true;
     }
 
@@ -639,10 +663,61 @@ public:
         for (const auto &tile : btmrtiles) {
             window.draw(tile);
         }
-        // Draw spaceship before hero
+        // Draw spaceship
         window.draw(spaceshipSprite);
+        
+        // Draw hero
         window.draw(heroSprite);
+        
+        // Draw trees last so they appear in front
+        for (const auto &tree : trees) {
+            window.draw(tree);
+        }
     }
+
+    // Add method to create trees in initialize():
+    // Update createTrees() with explicit float casting:
+void createTrees() {
+    // Calculate scale to match map scale
+    float treeScaleX = (TILE_SIZE * 3.0f) / TREE_WIDTH;  
+    float treeScaleY = (TILE_SIZE * 4.0f) / TREE_HEIGHT; 
+
+    // Create trees at various positions with explicit float casting
+    const int NUM_TREES = 10; // Increased number of trees
+    sf::Vector2f treePositions[NUM_TREES] = {
+        {static_cast<float>((map_lowerbound_width + 5) * TILE_SIZE), 
+         static_cast<float>((map_lowerbound_height + 5) * TILE_SIZE)},
+        {static_cast<float>((MAP_WIDTH - 8) * TILE_SIZE), 
+         static_cast<float>((map_lowerbound_height + 7) * TILE_SIZE)},
+        {static_cast<float>((map_lowerbound_width + 10) * TILE_SIZE), 
+         static_cast<float>((MAP_HEIGHT - 8) * TILE_SIZE)},
+        {static_cast<float>((MAP_WIDTH - 6) * TILE_SIZE), 
+         static_cast<float>((MAP_HEIGHT - 6) * TILE_SIZE)},
+        {static_cast<float>((map_lowerbound_width + 15) * TILE_SIZE), 
+         static_cast<float>((map_lowerbound_height + 15) * TILE_SIZE)},
+        {static_cast<float>((MAP_WIDTH - 12) * TILE_SIZE), 
+         static_cast<float>((MAP_HEIGHT - 12) * TILE_SIZE)},
+        {static_cast<float>((map_lowerbound_width + 8) * TILE_SIZE), 
+         static_cast<float>((map_lowerbound_height + 12) * TILE_SIZE)},
+        {static_cast<float>((MAP_WIDTH - 15) * TILE_SIZE), 
+         static_cast<float>((map_lowerbound_height + 10) * TILE_SIZE)},
+        {static_cast<float>((map_lowerbound_width + 20) * TILE_SIZE), 
+         static_cast<float>((MAP_HEIGHT - 10) * TILE_SIZE)},
+        {static_cast<float>((MAP_WIDTH - 10) * TILE_SIZE), 
+         static_cast<float>((MAP_HEIGHT - 15) * TILE_SIZE)}
+    };
+
+    // Create and setup tree sprites
+    for(int i = 0; i < NUM_TREES; i++) {
+        sf::Sprite treeSprite;
+        treeSprite.setTexture(i % 3 == 0 ? tree : (i % 3 == 1 ? tree2 : tree3));
+        treeSprite.setScale(treeScaleX, treeScaleY);
+        treeSprite.setPosition(treePositions[i]);
+        // Set origin to bottom center of tree for better placement
+        treeSprite.setOrigin(TREE_WIDTH/2.0f, TREE_HEIGHT);
+        trees.push_back(treeSprite);
+    }
+}
 };
 
 int main() {
