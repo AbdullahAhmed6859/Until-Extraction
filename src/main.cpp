@@ -594,9 +594,14 @@ public:
 
     // Add collision check method:
     bool wouldCollideWithSpaceship(const sf::Vector2f& newPosition) {
-        float dx = newPosition.x - spaceshipPosition.x;
-        float dy = newPosition.y - spaceshipPosition.y;
+        // Get actual center of spaceship sprite
+        sf::Vector2f spaceshipCenter = spaceshipSprite.getPosition();
+        
+        // Calculate distance from sprite centers
+        float dx = newPosition.x - spaceshipCenter.x;
+        float dy = newPosition.y - spaceshipCenter.y;
         float distance = std::sqrt(dx*dx + dy*dy);
+        
         return distance < COLLISION_RADIUS;
     }
 
