@@ -99,8 +99,7 @@ private:
     std::vector<sf::Sprite> walks5;
     std::vector<sf::Sprite> walks6;
 
-    
-    
+    sf::Sprite idleSprite;  // Add this near other sprite declarations
 
     sf::Sprite heroSprite;
     sf::Vector2f heroPosition;
@@ -160,6 +159,10 @@ private:
     // Add tree dimensions as constants in private section:
     const float TREE_WIDTH = 180.0f;
     const float TREE_HEIGHT = 256.0f;
+
+    float idleAnimationTimer = 0.0f;
+    int idleFrame = 0;
+    const float IDLE_FRAME_TIME = 0.2f;
 
 public:
     // Constructor: Initialize camera with the given view size
@@ -301,7 +304,7 @@ public:
             std::cout << "Failed to load tree3 animation!" << std::endl;
             return false;
         }
-        if(!idlet.loadFromFile("../assets/idle.png")) {
+        if(!idlet.loadFromFile("../assets/idlet.png")) {
             std::cout << "Failed to load idlet animation!" << std::endl;
             return false;
         }
@@ -415,6 +418,14 @@ public:
         float scaleX = static_cast<float>(TILE_SIZE) / HERO_WIDTH;
         float scaleY = static_cast<float>(TILE_SIZE) / HERO_HEIGHT;
         heroSprite.setScale(scaleX, scaleY);
+
+        // Setup idle sprite
+        idleSprite.setTexture(idlet);
+        idleSprite.setPosition(MAP_WIDTH/1.5f * TILE_SIZE, MAP_HEIGHT/1.5f * TILE_SIZE); // Center position
+        // Optional: Set origin to center of sprite
+        idleSprite.setOrigin(TILE_SIZE/2.0f, TILE_SIZE/2.0f);
+        // Optional: Set scale if needed
+        idleSprite.setScale(1.0f, 1.0f);
 
         generateMap();
         createTrees();
@@ -564,6 +575,20 @@ public:
 
         if (gameState != GameState::Running) {
             return;
+        }
+
+        // Update idle animation independently
+        idleAnimationTimer += deltaTime;
+        if (idleAnimationTimer >= IDLE_FRAME_TIME) {
+            idleAnimationTimer = 0.0f;
+            idleFrame = (idleFrame + 1) % 4;
+            
+            switch (idleFrame) {
+                case 0: idleSprite.setTexture(idlet); break;
+                case 1: idleSprite.setTexture(idle2); break;
+                case 2: idleSprite.setTexture(idle3); break;
+                case 3: idleSprite.setTexture(idle4); break;
+            }
         }
 
         float moveDistance = heroSpeed * deltaTime;
@@ -729,6 +754,9 @@ public:
                     case 6: heroSprite.setTexture(hero7); break;
                 }
 
+               
+
+
                 // Maintain direction
                 float scaleX = std::abs(heroSprite.getScale().x);
                 heroSprite.setScale(currentDirection == Left ? -scaleX : scaleX, heroSprite.getScale().y);
@@ -808,6 +836,9 @@ public:
         
         // Draw hero
         window.draw(heroSprite);
+        
+        // Draw idle sprite
+        window.draw(idleSprite);
         
         // Draw trees last so they appear in front
         for (const auto &tree : trees) {
