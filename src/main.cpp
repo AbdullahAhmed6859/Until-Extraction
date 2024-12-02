@@ -37,6 +37,29 @@ private:
     sf::Texture tree;
     sf::Texture tree2;
     sf::Texture tree3;
+    sf::Texture idlet;
+    sf::Texture idle2;
+    sf::Texture idle3;
+    sf::Texture idle4;
+    sf::Texture attack;
+    sf::Texture attack2;
+    sf::Texture attack3;
+    sf::Texture attack4;
+    sf::Texture attack5;
+    sf::Texture attack6;
+    sf::Texture death;
+    sf::Texture death2;
+    sf::Texture death3;
+    sf::Texture death4;
+    sf::Texture death5;
+    sf::Texture death6;
+    sf::Texture death7;
+    sf::Texture walk;
+    sf::Texture walk2;
+    sf::Texture walk3;
+    sf::Texture walk4;
+    sf::Texture walk5;
+    sf::Texture walk6;
 
     std::vector<sf::Sprite> tiles; // Container for all map tiles
     std::vector<sf::Sprite> stiles;
@@ -52,6 +75,31 @@ private:
     std::vector<sf::Sprite> trees;
     std::vector<sf::Sprite> trees2;
     std::vector<sf::Sprite> trees3;
+    std::vector<sf::Sprite> idles;
+    std::vector<sf::Sprite> idles2;
+    std::vector<sf::Sprite> idles3;
+    std::vector<sf::Sprite> idles4;
+    std::vector<sf::Sprite> attacks;
+    std::vector<sf::Sprite> attacks2;
+    std::vector<sf::Sprite> attacks3;
+    std::vector<sf::Sprite> attacks4;
+    std::vector<sf::Sprite> attacks5;
+    std::vector<sf::Sprite> attacks6;
+    std::vector<sf::Sprite> deaths;
+    std::vector<sf::Sprite> deaths2;
+    std::vector<sf::Sprite> deaths3;
+    std::vector<sf::Sprite> deaths4;
+    std::vector<sf::Sprite> deaths5;
+    std::vector<sf::Sprite> deaths6;
+    std::vector<sf::Sprite> deaths7;
+    std::vector<sf::Sprite> walks;
+    std::vector<sf::Sprite> walks2;
+    std::vector<sf::Sprite> walks3;
+    std::vector<sf::Sprite> walks4;
+    std::vector<sf::Sprite> walks5;
+    std::vector<sf::Sprite> walks6;
+
+    
     
 
     sf::Sprite heroSprite;
@@ -251,6 +299,98 @@ public:
         }
         if(!tree3.loadFromFile("../assets/tree3.png")) {
             std::cout << "Failed to load tree3 animation!" << std::endl;
+            return false;
+        }
+        if(!idlet.loadFromFile("../assets/idle.png")) {
+            std::cout << "Failed to load idlet animation!" << std::endl;
+            return false;
+        }
+        if(!idle2.loadFromFile("../assets/idle2.png")) {
+            std::cout << "Failed to load idle2 animation!" << std::endl;
+            return false;
+        }
+        if(!idle3.loadFromFile("../assets/idle3.png")) {
+            std::cout << "Failed to load idle3 animation!" << std::endl;
+            return false;
+        }
+        if(!idle4.loadFromFile("../assets/idle4.png")) {
+            std::cout << "Failed to load idle4 animation!" << std::endl;
+            return false;
+        }
+        if(!attack.loadFromFile("../assets/attack.png")) {
+            std::cout << "Failed to load attack animation!" << std::endl;
+            return false;
+        }
+        if(!attack2.loadFromFile("../assets/attack2.png")) {
+            std::cout << "Failed to load attack2 animation!" << std::endl;
+            return false;
+        }
+        if(!attack3.loadFromFile("../assets/attack3.png")) {
+            std::cout << "Failed to load attack3 animation!" << std::endl;
+            return false;
+        }
+        if(!attack4.loadFromFile("../assets/attack4.png")) {
+            std::cout << "Failed to load attack4 animation!" << std::endl;
+            return false;
+        }
+        if(!attack5.loadFromFile("../assets/attack5.png")) {
+            std::cout << "Failed to load attack5 animation!" << std::endl;
+            return false;
+        }
+        if(!attack6.loadFromFile("../assets/attack6.png")) {
+            std::cout << "Failed to load attack6 animation!" << std::endl;
+            return false;
+        }
+        if(!death.loadFromFile("../assets/death.png")) {
+            std::cout << "Failed to load death animation!" << std::endl;
+            return false;
+        }
+        if(!death2.loadFromFile("../assets/death2.png")) {
+            std::cout << "Failed to load death2 animation!" << std::endl;
+            return false;
+        }
+        if(!death3.loadFromFile("../assets/death3.png")) {
+            std::cout << "Failed to load death3 animation!" << std::endl;
+            return false;
+        }
+        if(!death4.loadFromFile("../assets/death4.png")) {
+            std::cout << "Failed to load death4 animation!" << std::endl;
+            return false;
+        }
+        if(!death5.loadFromFile("../assets/death5.png")) {
+            std::cout << "Failed to load death5 animation!" << std::endl;
+            return false;
+        }
+        if(!death6.loadFromFile("../assets/death6.png")) {
+            std::cout << "Failed to load death6 animation!" << std::endl;
+            return false;
+        }
+        if(!death7.loadFromFile("../assets/death7.png")) {
+            std::cout << "Failed to load death7 animation!" << std::endl;
+            return false;
+        }
+        if(!walk.loadFromFile("../assets/walk.png")) {
+            std::cout << "Failed to load walk animation!" << std::endl;
+            return false;
+        }
+        if(!walk2.loadFromFile("../assets/walk2.png")) {
+            std::cout << "Failed to load walk2 animation!" << std::endl;
+            return false;
+        }
+        if(!walk3.loadFromFile("../assets/walk3.png")) {
+            std::cout << "Failed to load walk3 animation!" << std::endl;
+            return false;
+        }
+        if(!walk4.loadFromFile("../assets/walk4.png")) {
+            std::cout << "Failed to load walk4 animation!" << std::endl;
+            return false;
+        }
+        if(!walk5.loadFromFile("../assets/walk5.png")) {
+            std::cout << "Failed to load walk5 animation!" << std::endl;
+            return false;
+        }
+        if(!walk6.loadFromFile("../assets/walk6.png")) {
+            std::cout << "Failed to load walk6 animation!" << std::endl;
             return false;
         }
         
@@ -719,6 +859,8 @@ void createTrees() {
     }
 }
 };
+
+
 
 int main() {
     const int WINDOW_WIDTH = 1280;
