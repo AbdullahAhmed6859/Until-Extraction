@@ -74,7 +74,7 @@ void SplashScreenState::update(const float dt) {
             static_cast<float>(windowSize.y) / 2.0f);
     }
 }
-// void method
+
 void SplashScreenState::render(float dt) {
     data->window.clear(sf::Color::Black);
     data->window.draw(background);
