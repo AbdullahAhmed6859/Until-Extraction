@@ -46,6 +46,8 @@ add_executable(main src/main.cpp
         src/Screens/SplashScreenState.hpp
         src/Screens/MainMenuState.cpp
         src/Screens/MainMenuState.hpp
+        src/Screens/GameState.cpp
+        src/Screens/GameState.hpp
 )
 
 target_link_libraries(main PRIVATE sfml-system sfml-window sfml-graphics sfml-audio)

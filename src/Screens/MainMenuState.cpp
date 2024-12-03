@@ -1,4 +1,6 @@
 #include "MainMenuState.hpp"
+#include "GameState.hpp"
+
 #include <iostream>
 #include <utility>
 
@@ -44,7 +46,7 @@ void MainMenuState::handleInput() {
     if (InputManager::isEnterPressed()) {
         std::cout << "go to Game" << std::endl;
         data->sound.stop();
-        // data->fsm.addState(StateRef(new GameState(data)), true);
+        data->fsm.addState(StateRef(new GameState(data)), true);
     }
 }
 
