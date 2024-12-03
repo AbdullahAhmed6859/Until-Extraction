@@ -599,7 +599,7 @@ public:
         shootTimer += deltaTime;
 
         // Handle shooting
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !isShooting) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter) && !isShooting) {
             isShooting = true;
             shootFrame = 0;
             shootTimer = 0.0f;
