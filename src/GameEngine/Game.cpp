@@ -1,6 +1,6 @@
 #include "Game.hpp"
 
-#include "../../cmake-build-debug/_deps/sfml-src/extlibs/headers/AL/alc.h"
+// #include "../../cmake-build-debug/_deps/sfml-src/extlibs/headers/AL/alc.h"
 #include "../Screens/SplashScreenState.hpp"
 #include "SFML/Audio/Listener.hpp"
 
@@ -19,11 +19,11 @@ Game::Game(const string &title) : dt(1.0 / 60.0) {
 Game::~Game() {
     sf::Listener::setGlobalVolume(0);
     data.reset();
-    ALCdevice* device = alcGetContextsDevice(alcGetCurrentContext());
-    if (device) {
-        alcMakeContextCurrent(nullptr); // Detach the context
-        alcCloseDevice(device);         // Close the device
-    }
+    // ALCdevice* device = alcGetContextsDevice(alcGetCurrentContext());
+    // if (device) {
+    //     alcMakeContextCurrent(nullptr); // Detach the context
+    //     alcCloseDevice(device);         // Close the device
+    // }
 }
 
 void Game::run() const {

@@ -48,6 +48,8 @@ add_executable(main src/main.cpp
         src/Screens/MainMenuState.hpp
         src/Screens/GameState.cpp
         src/Screens/GameState.hpp
+        src/Screens/TileMap.cpp
+        src/Screens/TileMap.hpp
 )
 
 target_link_libraries(main PRIVATE sfml-system sfml-window sfml-graphics sfml-audio)
@@ -62,15 +64,15 @@ add_custom_command(
 )
 
 # Copy DLLs for Windows
-#if(WIN32)
-#    add_custom_command(
-#        TARGET main
-#        COMMENT "Copy OpenAL DLL"
-#        PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy
-#        ${SFML_SOURCE_DIR}/extlibs/bin/$<IF:$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>,x64,x86>/openal32.dll
-#        $<TARGET_FILE_DIR:main>
-#        VERBATIM)
-#endif()
+if(WIN32)
+    add_custom_command(
+        TARGET main
+        COMMENT "Copy OpenAL DLL"
+        PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy
+        ${SFML_SOURCE_DIR}/extlibs/bin/$<IF:$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>,x64,x86>/openal32.dll
+        $<TARGET_FILE_DIR:main>
+        VERBATIM)
+endif()
 
 # Add custom target for building and running
 add_custom_target(run
