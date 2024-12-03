@@ -186,24 +186,18 @@ public:
         gameState = GameState::Running;
     }
     void updateHealth(int damage, float deltaTime) {
-        currentHealth = std::max(0, currentHealth - damage);
-
-        // Animate the health bar
-        healthBarTimer += deltaTime;
-        if (healthBarTimer >= HEALTH_BAR_FRAME_TIME) {
-            healthBarTimer = 0.0f;
-            int frameIndex =
-                static_cast<int>(static_cast<float>(currentHealth) / maxHealth * (healthBarTextures.size() - 1));
-            if (frameIndex >= 0 && frameIndex < static_cast<int>(healthBarTextures.size())) {
-                healthBarSprite.setTexture(healthBarTextures[frameIndex]);
-            }
+        currentHealth -= damage;
+        if(currentHealth < 0){
+            currentHealth = 0;
         }
+        int frameIndex = (currentHealth * (healthBarTextures.size() - 1)) / maxHealth;
+        healthBarSprite.setTexture(healthBarTextures[frameIndex]);
     }
 
     // Initialize the tilemap and load resources
     bool initialize() {
         // Loading health bar textures
-        for (int i = 11; i > 0; i--) { // Assuming 5 frames for health bar animation
+        for (int i = 1; i <= 11; i++) { // Assuming 5 frames for health bar animation
             sf::Texture texture;
             std::string filePath = "../assets/health" + std::to_string(i) + ".png";
             if (!texture.loadFromFile(filePath)) {
@@ -214,7 +208,7 @@ public:
         }
 
         // Set initial health bar sprite
-        healthBarSprite.setTexture(healthBarTextures[0]);
+        healthBarSprite.setTexture(healthBarTextures[10]);
         healthBarSprite.setScale(2.0f, 2.0f);      // Scale for better visibility
         healthBarSprite.setPosition(10.0f, 10.0f); // Position on the screen
 
