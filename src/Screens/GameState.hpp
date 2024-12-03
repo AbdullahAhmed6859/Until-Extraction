@@ -107,8 +107,11 @@ private:
     std::vector<sf::Sprite> walks5;
     std::vector<sf::Sprite> walks6;
 
+    std::vector<sf::Texture> healthBarTextures;
+    sf::Sprite healthBarSprite;
+    int currentHealth = 100;
+    int maxHealth=100;
     sf::Sprite idleSprite;  // Add this near other sprite declarations
-
     sf::Sprite heroSprite;
     sf::Vector2f heroPosition;
     float heroSpeed = 200.0f; // Pixels per second
@@ -188,9 +191,31 @@ public:
     camera.setCenter(centerX + TILE_SIZE, centerY);
     gameState = GameState::Running;
 }
-
+    void updateHealth(int damage, float deltaTime) {
+        currentHealth -= damage;
+        if(currentHealth < 0){
+            currentHealth = 0;
+        }
+        int frameIndex = (currentHealth * (healthBarTextures.size() - 1)) / maxHealth;
+        healthBarSprite.setTexture(healthBarTextures[frameIndex]);
+    }
     // Initialize the tilemap and load resources
     bool initialize() {
+        //Loading health texture
+        for (int i = 1; i <= 11; i++) {
+            sf::Texture texture;
+            std::string filePath = "../assets/health" + std::to_string(i) + ".png";
+            if (!texture.loadFromFile(filePath)) {
+                std::cout << "Failed to load health bar texture: " << filePath << std::endl;
+                return false;
+            }
+            healthBarTextures.push_back(std::move(texture));
+        }
+
+        // Set initial health bar sprite
+        healthBarSprite.setTexture(healthBarTextures[healthBarTextures.size() - 1]);
+        healthBarSprite.setScale(2.0f, 2.0f);      // Scale for better visibility
+        healthBarSprite.setPosition(10.0f, 10.0f); // Position on the screen
         // Load the single tile texture
         if (!texture.loadFromFile("../assets/tile014.png")) {
             std::cout << "Failed to load tile texture!" << std::endl;
@@ -523,7 +548,9 @@ public:
     // Update camera position based on input
     void updateHeroAndCamera(float deltaTime) {
         static bool escapeReleased = true;
-
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::H)) {   // DAMAGE ON H KEY FOR TESTING
+            updateHealth(10, deltaTime);
+        }
         // Handle pause toggle
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
             if (escapeReleased) {
@@ -807,8 +834,10 @@ public:
 
     // Draw the map
     void draw(sf::RenderWindow &window) {
+        // Draw game elements using the camera view
         window.setView(camera);
 
+        // Draw map tiles
         for (const auto &tile : tiles) {
             window.draw(tile);
         }
@@ -839,20 +868,23 @@ public:
         for (const auto &tile : btmrtiles) {
             window.draw(tile);
         }
-        // Draw spaceship
+
+        // Draw the spaceship
         window.draw(spaceshipSprite);
 
-        // Draw hero
+        // Draw the hero
         window.draw(heroSprite);
 
-        // Draw idle sprite
-        window.draw(idleSprite);
-
-        // Draw trees last so they appear in front
+        // Draw trees
         for (const auto &tree : trees) {
             window.draw(tree);
         }
-    }
+
+        // Switch to default view for UI elements
+        window.setView(window.getDefaultView());
+
+        // Draw the health bar
+        window.draw(healthBarSprite);}
 
     // Add method to create trees in initialize():
     // Update createTrees() with explicit float casting:
