@@ -12,6 +12,7 @@ GameState::GameState(GameDataRef data) : data(std::move(data)), map(sf::Vector2f
 }
 
 void GameState::init() {
+    map.initialize();
 }
 
 void GameState::handleInput() {
