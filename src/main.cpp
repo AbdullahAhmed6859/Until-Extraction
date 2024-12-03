@@ -66,8 +66,6 @@ private:
     sf::Sprite healthBarSprite;
     int currentHealth = 100;
     int maxHealth = 100;
-    float healthBarTimer = 0.0f;
-    const float HEALTH_BAR_FRAME_TIME = 0.2f;
 
     std::vector<sf::Sprite> tiles; // Container for all map tiles
     std::vector<sf::Sprite> stiles;
@@ -185,6 +183,7 @@ public:
         camera.setCenter(centerX + TILE_SIZE, centerY);
         gameState = GameState::Running;
     }
+
     void updateHealth(int damage, float deltaTime) {
         currentHealth -= damage;
         if(currentHealth < 0){
@@ -197,7 +196,7 @@ public:
     // Initialize the tilemap and load resources
     bool initialize() {
         // Loading health bar textures
-        for (int i = 1; i <= 11; i++) { // Assuming 5 frames for health bar animation
+        for (int i = 1; i <= 11; i++) { 
             sf::Texture texture;
             std::string filePath = "../assets/health" + std::to_string(i) + ".png";
             if (!texture.loadFromFile(filePath)) {
@@ -208,7 +207,7 @@ public:
         }
 
         // Set initial health bar sprite
-        healthBarSprite.setTexture(healthBarTextures[10]);
+        healthBarSprite.setTexture(healthBarTextures[healthBarTextures.size() - 1]);
         healthBarSprite.setScale(2.0f, 2.0f);      // Scale for better visibility
         healthBarSprite.setPosition(10.0f, 10.0f); // Position on the screen
 
@@ -525,7 +524,7 @@ public:
     // Update camera position based on input
     void updateHeroAndCamera(float deltaTime) {
         static bool escapeReleased = true;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::H)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::H)) {   // DAMAGE ON H KEY FOR TESTING
             updateHealth(10, deltaTime);
         }
         // Handle pause toggle
@@ -613,7 +612,7 @@ public:
         shootTimer += deltaTime;
 
         // Handle shooting
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && !isShooting) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && !isShooting) {
             isShooting = true;
             shootFrame = 0;
             shootTimer = 0.0f;
